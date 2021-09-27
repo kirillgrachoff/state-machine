@@ -1,5 +1,5 @@
 
-name: Test edge_machine module
+name: Test remove_epsilon module
 
 on:
   push:
