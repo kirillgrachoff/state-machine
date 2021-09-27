@@ -17,6 +17,7 @@ type Edge struct {
 type FinalStateMachine interface {
     GoBy(from []State, with string) []State
 	OutgoingEdges(from []State) []Edge
+	IngoingEdges(to []State) []Edge
 	States() []State
 }
 

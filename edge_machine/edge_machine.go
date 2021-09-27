@@ -7,14 +7,27 @@ import (
 
 // Machine is represented With its list of edges
 type Machine struct {
+	states []State
 	mapping []Edge
 }
 
-func NewMachine(transfers []Edge) *Machine {
+func NewMachine(transfers []Edge, terminateVertices []uint) *Machine {
 	machine := &Machine{
+		states: make([]State, 0, 0),
 		mapping: make([]Edge, len(transfers), len(transfers)),
 	}
 	copy(machine.mapping, transfers)
+	cnt := make(map[uint]bool)
+	for _, e := range transfers {
+		cnt[e.From] = true
+		cnt[e.To] = true
+	}
+	for i := uint(0); i < uint(len(cnt)); i++ {
+		machine.states = append(machine.states, State{Index: i})
+	}
+	for _, t := range terminateVertices {
+		machine.states[t].Finish = true
+	}
 	return machine
 }
 
@@ -40,15 +53,15 @@ func (machine Machine) goByRune(from []m.State, with string) []m.State {
 	if len(with) > 1 {
 		log.Fatalln("transfer size is > 1")
 	}
-	fromCnt := make(map[State]bool)
+	fromCnt := make(map[uint]bool)
 	for _, f := range from {
-		fromCnt[State{f.Number(), f.Terminate()}] = true
+		fromCnt[f.Number()] = true
 	}
 
 	ans := make([]m.State, 0, 0)
 	for _, e := range machine.mapping {
 		if fromCnt[e.From] && e.With == with {
-			ans = append(ans, e.To)
+			ans = append(ans, machine.states[e.To])
 		}
 	}
 	return ans
@@ -68,32 +81,44 @@ func (machine Machine) GoBy(from []m.State, with string) []m.State {
 }
 
 func (machine Machine) States() []m.State {
-	statesCnt := make(map[State]bool)
-	for _, e := range machine.mapping {
-		statesCnt[e.From] = true
-	}
-	ans := make([]m.State, 0, 0)
-	for key := range statesCnt {
-		ans = append(ans, key)
+	ans := make([]m.State, 0, len(machine.states))
+	for _, v := range machine.states {
+		ans = append(ans, v)
 	}
 	return ans
 }
 
 func (machine Machine) OutgoingEdges(from []m.State) []m.Edge {
 	ans := make([]m.Edge, 0)
+	in := make(map[uint]bool)
 	for _, from := range from {
-		for _, e := range machine.mapping {
-			if e.From.Number() == from.Number() {
-				ans = append(ans, m.Edge{From: from, To: e.To, With: e.With})
-			}
+		in[from.Number()] = true
+	}
+	for _, e := range machine.mapping {
+		if in[e.From] {
+			ans = append(ans, m.Edge{From: machine.states[e.From], To: machine.states[e.To], With: e.With})
+		}
+	}
+	return ans
+}
+
+func (machine Machine) IngoingEdges(to []m.State) []m.Edge {
+	ans := make([]m.Edge, 0)
+	in := make(map[uint]bool)
+	for _, to := range to {
+		in[to.Number()] = true
+	}
+	for _, e := range machine.mapping {
+		if in[e.To] {
+			ans = append(ans, m.Edge{From: machine.states[e.From], To: machine.states[e.To], With: e.With})
 		}
 	}
 	return ans
 }
 
 type Edge struct {
-	From State
-	To   State
+	From uint
+	To   uint
 	With string
 }
 
@@ -101,7 +126,7 @@ func NewEdge(from State, to State, with string) *Edge {
 	if len(with) > 1 {
 		log.Fatalln("too big jump")
 	}
-	return &Edge{from, to, with}
+	return &Edge{from.Number(), to.Number(), with}
 }
 
 func (e Edge) Equals(another Edge) bool {
