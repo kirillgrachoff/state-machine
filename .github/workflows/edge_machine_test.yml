@@ -1,9 +1,9 @@
 
-name: Test modules
+name: Test edge_machine module
 
 on:
   push:
-    branches: [edge_machine, develop]
+    branches: [develop]
   pull_request:
     branches: [develop, main]
 jobs:
