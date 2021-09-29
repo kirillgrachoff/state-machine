@@ -1,6 +1,9 @@
 package tools
 
-import m "state-machine/machine"
+import (
+	"sort"
+	m "state-machine/machine"
+)
 import edge "state-machine/edge_machine"
 
 func RemoveUnused(machine m.FinalStateMachine) m.FinalStateMachine {
@@ -8,14 +11,18 @@ func RemoveUnused(machine m.FinalStateMachine) m.FinalStateMachine {
 }
 
 func repaintVertices(machine m.FinalStateMachine) *edge.Machine {
+	states := machine.States()
+	sort.Slice(states, func(i, j int) bool {
+		return states[i].Number() < states[j].Number()
+	})
 	index := make(map[uint]uint)
-	for i, s := range machine.States() {
+	for i, s := range states {
 		index[s.Number()] = uint(i)
 	}
 	terminate := make([]uint, 0)
 	start := make([]uint, 0)
 	edges := make([]edge.Edge, 0)
-	for _, s := range machine.States() {
+	for _, s := range states {
 		if s.Start() {
 			start = append(start, s.Number())
 		}
