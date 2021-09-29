@@ -7,26 +7,34 @@ import (
 
 // Machine is represented With its list of edges
 type Machine struct {
-	states []State
+	states map[uint]State
 	mapping []Edge
 }
 
-func NewMachine(transfers []Edge, terminateVertices []uint) *Machine {
+func NewMachine(transfers []Edge, startVertices, terminateVertices []uint) *Machine {
 	machine := &Machine{
-		states: make([]State, 0, 0),
+		states: make(map[uint]State),
 		mapping: make([]Edge, len(transfers), len(transfers)),
 	}
 	copy(machine.mapping, transfers)
-	cnt := make(map[uint]bool)
+	const (
+		isTerminate = 1 << iota
+		isStart
+		isUsed
+	)
+	cnt := make(map[uint]uint)
 	for _, e := range transfers {
-		cnt[e.From] = true
-		cnt[e.To] = true
+		cnt[e.From] |= isUsed
+		cnt[e.To] |= isUsed
 	}
-	for i := uint(0); i < uint(len(cnt)); i++ {
-		machine.states = append(machine.states, State{Index: i})
+	for _, s := range startVertices {
+		cnt[s] |= isStart
 	}
 	for _, t := range terminateVertices {
-		machine.states[t].Finish = true
+		cnt[t] |= isTerminate
+	}
+	for k, v := range cnt {
+		machine.states[k] = State{Index: k, End: (v & isTerminate) != 0, Begin: (v & isStart) != 0}
 	}
 	return machine
 }
@@ -122,6 +130,10 @@ type Edge struct {
 	With string
 }
 
+func NewEdgeMachine(e m.Edge) *Edge {
+	return &Edge{From: e.From.Number(), To: e.To.Number(), With: e.With}
+}
+
 func NewEdge(from State, to State, with string) *Edge {
 	if len(with) > 1 {
 		log.Fatalln("too big jump")
@@ -134,8 +146,9 @@ func (e Edge) Equals(another Edge) bool {
 }
 
 type State struct {
-	Index  uint
-	Finish bool
+	Index uint
+	End   bool
+	Begin bool
 }
 
 func (s State) Equals(another State) bool {
@@ -147,5 +160,9 @@ func (s State) Number() uint {
 }
 
 func (s State) Terminate() bool {
-	return s.Finish
+	return s.End
+}
+
+func (s State) Start() bool {
+	return s.Begin
 }
