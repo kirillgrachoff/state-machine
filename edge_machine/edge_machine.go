@@ -11,6 +11,26 @@ type Machine struct {
 	mapping []Edge
 }
 
+func NewCanonicalMachine(transfers []m.Edge) *Machine {
+	edges := make([]Edge, 0)
+	terminate := make([]uint, 0)
+	start := make([]uint, 0)
+	insert := func(s m.State) {
+		if s.Terminate() {
+			terminate = append(terminate, s.Number())
+		}
+		if s.Start() {
+			start = append(start, s.Number())
+		}
+	}
+	for _, e := range transfers {
+		insert(e.To)
+		insert(e.From)
+		edges = append(edges, Edge{e.From.Number(), e.To.Number(), e.With})
+	}
+	return NewMachine(edges, start, terminate)
+}
+
 func NewMachine(transfers []Edge, startVertices, terminateVertices []uint) *Machine {
 	machine := &Machine{
 		states: make(map[uint]State),
