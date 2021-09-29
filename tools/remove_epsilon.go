@@ -3,10 +3,15 @@ package tools
 import (
 	edge "state-machine/edge_machine"
 	m "state-machine/machine"
+	"log"
 )
 
-func RemoveEpsilon(machine m.FinalStateMachine) (m.FinalStateMachine, error) {
-	return removeEpsilon(machine)
+func RemoveEpsilon(machine m.FinalStateMachine) m.FinalStateMachine {
+	ans, err := removeEpsilon(machine)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return ans
 }
 
 func removeEpsilon(machine m.FinalStateMachine) (*edge.Machine, error) {

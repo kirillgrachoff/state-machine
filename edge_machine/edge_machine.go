@@ -7,7 +7,7 @@ import (
 
 // Machine is represented With its list of edges
 type Machine struct {
-	states map[uint]State
+	states  map[uint]State
 	mapping []Edge
 }
 
@@ -33,7 +33,7 @@ func NewCanonicalMachine(transfers []m.Edge) *Machine {
 
 func NewMachine(transfers []Edge, startVertices, terminateVertices []uint) *Machine {
 	machine := &Machine{
-		states: make(map[uint]State),
+		states:  make(map[uint]State),
 		mapping: make([]Edge, len(transfers), len(transfers)),
 	}
 	copy(machine.mapping, transfers)
