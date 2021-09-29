@@ -1,6 +1,7 @@
 package tools
 
 import (
+	edge "state-machine/edge_machine"
 	m "state-machine/machine"
 	"testing"
 )
@@ -76,9 +77,26 @@ func TestEdgeToTerminate(t *testing.T) {
 		m.Edge{innerState{number: 3, terminate: true}, terminate, ""},
 	}
 
-	ans, _ := edgeToTerminate(input)
+	ans := edgeToTerminate(input)
 
 	if !Equals(out, ans) || Equals(fakeOut, ans) {
+		t.Fail()
+	}
+}
+
+func TestMakeRegex(t *testing.T) {
+	m := newMachine(
+		[]uint{0},
+		[]uint{1},
+		edge.Edge{0, 1, "a"},
+		edge.Edge{1, 1, "b"},
+	)
+
+	out := "a((b))*"
+
+	ans := MakeRegex(m)
+
+	if ans != out {
 		t.Fail()
 	}
 }
