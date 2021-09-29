@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func newMachine(start, terminate []uint, transfers... edge.Edge) *edge.Machine {
+func newMachine(start, terminate []uint, transfers ...edge.Edge) *edge.Machine {
 	ans := make([]edge.Edge, 0, len(transfers))
 	ans = append(ans, transfers...)
 	return edge.NewMachine(ans, start, terminate)

@@ -85,22 +85,22 @@ func TestEdgeToTerminate(t *testing.T) {
 }
 
 func TestMakeRegex(t *testing.T) {
-	{
-		m := newMachine(
-			[]uint{0},
-			[]uint{1},
-			edge.Edge{0, 1, "a"},
-			edge.Edge{1, 1, "b"},
-		)
-
-		out := "(a((b))*)"
-
-		ans := MakeRegex(m)
-
-		if ans != out {
-			t.Fail()
-		}
-	}
+	//{
+	//	m := newMachine(
+	//		[]uint{0},
+	//		[]uint{1},
+	//		edge.Edge{0, 1, "a"},
+	//		edge.Edge{1, 1, "b"},
+	//	)
+	//
+	//	out := "(a((b))*)"
+	//
+	//	ans := MakeRegex(m)
+	//
+	//	if ans != out {
+	//		t.Fail()
+	//	}
+	//}
 	{
 		m := newMachine(
 			[]uint{0, 1},

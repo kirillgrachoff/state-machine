@@ -9,12 +9,12 @@ import (
 const terminateVertex = uint(math.MaxUint)
 
 func FullMachine(alphabet string) func(machine m.FinalStateMachine) m.FinalStateMachine {
-	return func (machine m.FinalStateMachine) m.FinalStateMachine {
+	return func(machine m.FinalStateMachine) m.FinalStateMachine {
 		return fullMachine(alphabet)(machine)
 	}
 }
 
-func fullMachine(alphabet string) func (machine m.FinalStateMachine) *edge.Machine {
+func fullMachine(alphabet string) func(machine m.FinalStateMachine) *edge.Machine {
 	return func(machine m.FinalStateMachine) *edge.Machine {
 		start := make([]uint, 0)
 		terminate := make([]uint, 0)
