@@ -1,5 +1,5 @@
 
-name: Test remove_epsilon module
+name: Test tools module
 
 on:
   push:
@@ -12,4 +12,4 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: gosetup
-        run: go test state-machine/remove_epsilon
+        run: go test state-machine/tools

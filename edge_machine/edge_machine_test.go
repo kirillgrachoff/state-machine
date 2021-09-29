@@ -5,10 +5,10 @@ import (
 	"testing"
 )
 
-func newMachine(terminate []uint, transfers... Edge) *Machine {
+func newMachine(start, terminate []uint, transfers... Edge) *Machine {
 	ans := make([]Edge, 0, len(transfers))
 	ans = append(ans, transfers...)
-	return NewMachine(ans, terminate)
+	return NewMachine(ans, start, terminate)
 }
 
 func Equals(a, b []m.State) bool {
@@ -29,6 +29,7 @@ func Equals(a, b []m.State) bool {
 
 func TestEmptyTransfers(t *testing.T) {
 	m1 := newMachine(
+		[]uint{0},
 		[]uint{},
 		Edge{From: 0, To: 1, With: ""},
 		Edge{From: 1, To: 2, With: ""},
@@ -49,21 +50,25 @@ func TestEmptyTransfers(t *testing.T) {
 
 func TestEquals(t *testing.T) {
 	m1 := newMachine(
+		[]uint{0},
 		[]uint{},
 		Edge{From: 0, To: 1, With: ""},
 		Edge{From: 1, To: 2, With: ""},
 	)
 	m2 := newMachine(
+		[]uint{0},
 		[]uint{},
 		Edge{From: 1, To: 2, With: ""},
 		Edge{From: 0, To: 1, With: ""},
 	)
 	m3 := newMachine(
+		[]uint{0},
 		[]uint{},
 		Edge{From: 0, To: 1, With: ""},
 		Edge{From: 1, To: 3, With: ""},
 	)
 	m4 := newMachine(
+		[]uint{0},
 		[]uint{},
 		Edge{From: 0, To: 1, With: ""},
 		Edge{From: 1, To: 2, With: "a"},

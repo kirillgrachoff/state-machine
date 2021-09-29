@@ -1,4 +1,4 @@
-package remove_epsilon
+package tools
 
 import (
 	edge "state-machine/edge_machine"
@@ -11,16 +11,20 @@ func RemoveEpsilon(machine m.FinalStateMachine) (m.FinalStateMachine, error) {
 
 func removeEpsilon(machine m.FinalStateMachine) (*edge.Machine, error) {
 	ans := make([]edge.Edge, 0)
+	start := make([]uint, 0, 1)
 	terminate := make([]uint, 0, 0)
 	for _, state := range machine.States() {
 		if state.Terminate() {
 			terminate = append(terminate, state.Number())
 		}
+		if state.Start() {
+			start = append(start, state.Number())
+		}
 		to := goByEmptyTransfers(machine, state)
 		ans = append(ans, to...)
 	}
 	terminate = findTerminate(machine, terminate)
-	return edge.NewMachine(ans, terminate), nil
+	return edge.NewMachine(ans, start, terminate), nil
 }
 
 // goByEmptyTransfers transforms all empty-string transfers from the state

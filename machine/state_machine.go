@@ -3,6 +3,7 @@ package machine
 // State is an inner representation of machine's state
 type State interface {
 	Number() uint
+	Start() bool
 	Terminate() bool
 }
 
@@ -26,4 +27,3 @@ type DeterminedStateMachine interface {
 	FinalStateMachine
 	Match(str string) bool
 }
-
