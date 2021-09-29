@@ -5,24 +5,8 @@ import (
 	"testing"
 )
 
-type innerState struct {
-	number uint
-}
-
-func (i innerState) Number() uint {
-	return i.number
-}
-
-func (i innerState) Start() bool {
-	return false
-}
-
-func (i innerState) Terminate() bool {
-	return false
-}
-
 func newEdge(from, to uint, with string) m.Edge {
-	return m.Edge{From: innerState{from}, To: innerState{to}, With: with}
+	return m.Edge{From: innerState{number: from}, To: innerState{number: to}, With: with}
 }
 
 func Equals(a, b []m.Edge) bool {
@@ -64,6 +48,37 @@ func TestDeleteVertex(t *testing.T) {
 
 	ans := deleteVertex(left, loops, right)
 	if !Equals(out, ans) {
+		t.Fail()
+	}
+}
+
+func TestEdgeToTerminate(t *testing.T) {
+	terminate := innerState{terminateVertex, true, false}
+	input := []m.Edge{
+		m.Edge{innerState{number: 0, terminate: true, start: true}, innerState{number: 1}, "0-1"},
+		newEdge(1, 2, "1-2"),
+		m.Edge{innerState{number: 2}, innerState{number: 3, terminate: true}, "2-3"},
+	}
+
+	out := []m.Edge{
+		m.Edge{innerState{number: 0, terminate: false, start: true}, innerState{number: 1}, "0-1"},
+		newEdge(1, 2, "1-2"),
+		m.Edge{innerState{number: 2}, innerState{number: 3, terminate: false}, "2-3"},
+		m.Edge{innerState{number: 0, terminate: false, start: true}, terminate, ""},
+		m.Edge{innerState{number: 3, terminate: false}, terminate, ""},
+	}
+
+	fakeOut := []m.Edge{
+		m.Edge{innerState{number: 0, terminate: true, start: true}, innerState{number: 1}, "0-1"},
+		newEdge(1, 2, "1-2"),
+		m.Edge{innerState{number: 2}, innerState{number: 3, terminate: true}, "2-3"},
+		m.Edge{innerState{number: 0, terminate: false, start: true}, terminate, ""},
+		m.Edge{innerState{number: 3, terminate: true}, terminate, ""},
+	}
+
+	ans, _ := edgeToTerminate(input)
+
+	if !Equals(out, ans) || Equals(fakeOut, ans) {
 		t.Fail()
 	}
 }
