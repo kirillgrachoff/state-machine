@@ -7,7 +7,7 @@ import (
 )
 
 func newEdge(from, to uint, with string) m.Edge {
-	return m.Edge{From: innerState{number: from}, To: innerState{number: to}, With: with}
+	return m.Edge{From: innerState{Index: from}, To: innerState{Index: to}, With: with}
 }
 
 func Equals(a, b []m.Edge) bool {
@@ -47,7 +47,7 @@ func TestDeleteVertex(t *testing.T) {
 		newEdge(0, 3, "0((a)+(b))*3"),
 	}
 
-	ans := deleteVertex(left, loops, right)
+	ans := deleteVertex([]m.Edge{}, nil, left, loops, right)
 	if !Equals(out, ans) {
 		t.Fail()
 	}
@@ -56,25 +56,25 @@ func TestDeleteVertex(t *testing.T) {
 func TestEdgeToTerminate(t *testing.T) {
 	terminate := innerState{terminateVertex, true, false}
 	input := []m.Edge{
-		m.Edge{innerState{number: 0, terminate: true, start: true}, innerState{number: 1}, "0-1"},
+		m.Edge{innerState{Index: 0, End: true, Begin: true}, innerState{Index: 1}, "0-1"},
 		newEdge(1, 2, "1-2"),
-		m.Edge{innerState{number: 2}, innerState{number: 3, terminate: true}, "2-3"},
+		m.Edge{innerState{Index: 2}, innerState{Index: 3, End: true}, "2-3"},
 	}
 
 	out := []m.Edge{
-		m.Edge{innerState{number: 0, terminate: false, start: true}, innerState{number: 1}, "0-1"},
+		m.Edge{innerState{Index: 0, End: false, Begin: true}, innerState{Index: 1}, "0-1"},
 		newEdge(1, 2, "1-2"),
-		m.Edge{innerState{number: 2}, innerState{number: 3, terminate: false}, "2-3"},
-		m.Edge{innerState{number: 0, terminate: false, start: true}, terminate, ""},
-		m.Edge{innerState{number: 3, terminate: false}, terminate, ""},
+		m.Edge{innerState{Index: 2}, innerState{Index: 3, End: false}, "2-3"},
+		m.Edge{innerState{Index: 0, End: false, Begin: true}, terminate, ""},
+		m.Edge{innerState{Index: 3, End: false}, terminate, ""},
 	}
 
 	fakeOut := []m.Edge{
-		m.Edge{innerState{number: 0, terminate: true, start: true}, innerState{number: 1}, "0-1"},
+		m.Edge{innerState{Index: 0, End: true, Begin: true}, innerState{Index: 1}, "0-1"},
 		newEdge(1, 2, "1-2"),
-		m.Edge{innerState{number: 2}, innerState{number: 3, terminate: true}, "2-3"},
-		m.Edge{innerState{number: 0, terminate: false, start: true}, terminate, ""},
-		m.Edge{innerState{number: 3, terminate: true}, terminate, ""},
+		m.Edge{innerState{Index: 2}, innerState{Index: 3, End: true}, "2-3"},
+		m.Edge{innerState{Index: 0, End: false, Begin: true}, terminate, ""},
+		m.Edge{innerState{Index: 3, End: true}, terminate, ""},
 	}
 
 	ans := edgeToTerminate(input)
@@ -85,18 +85,36 @@ func TestEdgeToTerminate(t *testing.T) {
 }
 
 func TestMakeRegex(t *testing.T) {
-	m := newMachine(
-		[]uint{0},
-		[]uint{1},
-		edge.Edge{0, 1, "a"},
-		edge.Edge{1, 1, "b"},
-	)
+	{
+		m := newMachine(
+			[]uint{0},
+			[]uint{1},
+			edge.Edge{0, 1, "a"},
+			edge.Edge{1, 1, "b"},
+		)
 
-	out := "a((b))*"
+		out := "(a((b))*)"
 
-	ans := MakeRegex(m)
+		ans := MakeRegex(m)
 
-	if ans != out {
-		t.Fail()
+		if ans != out {
+			t.Fail()
+		}
+	}
+	{
+		m := newMachine(
+			[]uint{0, 1},
+			[]uint{1, 2},
+			edge.Edge{0, 1, "a"},
+			edge.Edge{1, 2, "b"},
+		)
+
+		out := "(b)+()+(a)"
+
+		ans := MakeRegex(m)
+
+		if ans != out {
+			t.Fail()
+		}
 	}
 }

@@ -53,32 +53,34 @@ func MakeRegex(machine m.FinalStateMachine) string {
 			continue
 		}
 		left, loop, right := getIngoingLoopsOutgoing(machineFromEdges(edges), s)
-		edges = deleteVertex(left, loop, right)
+		edges = deleteVertex(edges, s, left, loop, right)
 	}
 	ans := ""
 	for _, e := range edges {
 		ans += fmt.Sprintf("+(%v)", e.With)
 	}
-	ans = ans[2:len(ans) - 1]
+	if len(ans) > 0 {
+		ans = ans[1:]
+	}
 	return ans
 }
 
 type innerState struct {
-	number uint
-	terminate bool
-	start bool
+	Index uint
+	End   bool
+	Begin bool
 }
 
 func (i innerState) Number() uint {
-	return i.number
+	return i.Index
 }
 
 func (i innerState) Start() bool {
-	return i.start
+	return i.Begin
 }
 
 func (i innerState) Terminate() bool {
-	return i.terminate
+	return i.End
 }
 
 func edgeToTerminate(edges []m.Edge) (ans []m.Edge) {
@@ -119,7 +121,7 @@ func edgeToTerminate(edges []m.Edge) (ans []m.Edge) {
 	return
 }
 
-func deleteVertex(ingoing, loops, outgoing []m.Edge) []m.Edge {
+func deleteVertex(edges []m.Edge, vertex m.State, ingoing, loops, outgoing []m.Edge) []m.Edge {
 	var middleRegex string
 	for _, e := range loops {
 		if e.From.Number() != e.To.Number() {
@@ -141,6 +143,12 @@ func deleteVertex(ingoing, loops, outgoing []m.Edge) []m.Edge {
 			}
 			ans = append(ans, m.Edge{in.From, out.To, fmt.Sprintf("%v%v%v", in.With, middleRegex, out.With)})
 		}
+	}
+	for _, e := range edges {
+		if e.From.Number() == vertex.Number() || e.To.Number() == vertex.Number() {
+			continue
+		}
+		ans = append(ans, e)
 	}
 	return ans
 }
