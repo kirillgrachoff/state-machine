@@ -24,10 +24,10 @@ func repaintVertices(machine m.FinalStateMachine) *edge.Machine {
 	edges := make([]edge.Edge, 0)
 	for _, s := range states {
 		if s.Start() {
-			start = append(start, s.Number())
+			start = append(start, index[s.Number()])
 		}
 		if s.Terminate() {
-			terminate = append(terminate, s.Number())
+			terminate = append(terminate, index[s.Number()])
 		}
 		for _, e := range machine.OutgoingEdges([]m.State{s}) {
 			edges = append(edges, edge.Edge{From: index[e.From.Number()], To: index[e.To.Number()], With: e.With})
