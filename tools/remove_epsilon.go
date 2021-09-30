@@ -1,9 +1,9 @@
 package tools
 
 import (
+	"log"
 	edge "state-machine/edge_machine"
 	m "state-machine/machine"
-	"log"
 )
 
 func RemoveEpsilon(machine m.FinalStateMachine) m.FinalStateMachine {
