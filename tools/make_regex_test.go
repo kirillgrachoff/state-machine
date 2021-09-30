@@ -47,7 +47,7 @@ func TestDeleteVertex(t *testing.T) {
 		newEdge(0, 3, "0((a)+(b))*3"),
 	}
 
-	ans := deleteVertex([]m.Edge{}, nil, left, loops, right)
+	ans := deleteVertex(left, loops, right)
 	if !Equals(out, ans) {
 		t.Fail()
 	}
@@ -85,22 +85,22 @@ func TestEdgeToTerminate(t *testing.T) {
 }
 
 func TestMakeRegex(t *testing.T) {
-	//{
-	//	m := newMachine(
-	//		[]uint{0},
-	//		[]uint{1},
-	//		edge.Edge{0, 1, "a"},
-	//		edge.Edge{1, 1, "b"},
-	//	)
-	//
-	//	out := "(a((b))*)"
-	//
-	//	ans := MakeRegex(m)
-	//
-	//	if ans != out {
-	//		t.Fail()
-	//	}
-	//}
+	{
+		m := newMachine(
+			[]uint{0},
+			[]uint{1},
+			edge.Edge{0, 1, "a"},
+			edge.Edge{1, 1, "b"},
+		)
+
+		out := "(a((b))*)"
+
+		ans := MakeRegex(m)
+
+		if ans != out {
+			t.Fail()
+		}
+	}
 	{
 		m := newMachine(
 			[]uint{0, 1},
@@ -109,12 +109,30 @@ func TestMakeRegex(t *testing.T) {
 			edge.Edge{1, 2, "b"},
 		)
 
-		out := "(b)+()+(a)"
+		out := "()+(a)+(b)"
 
 		ans := MakeRegex(m)
 
 		if ans != out {
 			t.Fail()
+		}
+	}
+}
+
+func BenchmarkMakeRegex(b *testing.B) {
+	m := newMachine(
+		[]uint{0, 1},
+		[]uint{1, 2},
+		edge.Edge{0, 1, "a"},
+		edge.Edge{1, 2, "b"},
+	)
+
+	out := "()+(a)+(b)"
+	for testNo := 0; testNo < b.N; testNo++ {
+		ans := MakeRegex(m)
+		_ = ans
+		if ans != out {
+			b.Fail()
 		}
 	}
 }
