@@ -82,9 +82,20 @@ func MakeRegex(machine m.FinalStateMachine) string {
 			edges = append(edges, v)
 		}
 	}
-	ans := ""
+	ansCnt := make(map[string]struct{})
 	for _, e := range edges {
-		ans += fmt.Sprintf("+(%v)", e.With)
+		ansCnt[fmt.Sprintf("+(%v)", e.With)] = struct{}{}
+	}
+	ansArray := make([]string, 0)
+	for s := range ansCnt {
+		ansArray = append(ansArray, s)
+	}
+	sort.Slice(ansArray, func(i, j int) bool {
+		return ansArray[i] < ansArray[j]
+	})
+	ans := ""
+	for _, s := range ansArray {
+		ans += s
 	}
 	if len(ans) > 0 {
 		ans = ans[1:]
@@ -146,12 +157,25 @@ func edgeToTerminate(edges []m.Edge) (ans []m.Edge) {
 }
 
 func deleteVertex(ingoing, loops, outgoing []m.Edge) []m.Edge {
-	var middleRegex string
+	middleRegexCnt := make(map[string]struct{})
 	for _, e := range loops {
 		if e.From.Number() != e.To.Number() {
 			log.Fatalln("loop is not loop")
 		}
-		middleRegex = middleRegex + fmt.Sprintf("+(%v)", e.With)
+		middleRegexCnt[e.With] = struct{}{}
+	}
+	var middleRegex string
+	{
+		all := make([]string, 0)
+		for s := range middleRegexCnt {
+			all = append(all, s)
+		}
+		sort.Slice(all, func(i, j int) bool {
+			return all[i] < all[j]
+		})
+		for _, v := range all {
+			middleRegex += fmt.Sprintf("+(%v)", v)
+		}
 	}
 	if len(middleRegex) > 0 {
 		middleRegex = middleRegex[1:]
