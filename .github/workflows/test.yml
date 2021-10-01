@@ -2,8 +2,6 @@
 name: Test modules
 
 on:
-  push:
-    branches: [develop]
   pull_request:
     branches: [develop, main]
 jobs:
