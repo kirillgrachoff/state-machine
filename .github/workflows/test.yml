@@ -18,3 +18,10 @@ jobs:
         run: go test state-machine/tools
       - name: gobench tools
         run: go test ./tools -test.bench -test.run
+      - name: go coverage
+        run: go test state-machine/edge_machine state-machine/tools -coverprofile=out.cov
+      - name: upload artifacts
+        uses: actions/upload-artifacts@v2
+        with:
+          name: coverage
+          path: out.cov
