@@ -12,10 +12,6 @@ jobs:
         with:
           go-version: '1.17'
       - uses: actions/checkout@v2
-      - name: gotest edge_machine
-        run: go test state-machine/edge_machine
-      - name: gotest tools
-        run: go test state-machine/tools
       - name: gobench tools
         run: go test ./tools -test.bench -test.run
       - name: go coverage
