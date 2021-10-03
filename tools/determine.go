@@ -7,8 +7,8 @@ import (
 )
 
 // Determine is a function which removes all ambiguous transfers
-func Determine(machine m.FinalStateMachine) m.FinalStateMachine {
-	return determine(machine)
+func Determine(machine m.FinalStateMachine) (m.FinalStateMachine, error) {
+	return determine(machine), nil
 }
 
 func determine(machine m.FinalStateMachine) *edge.Machine {

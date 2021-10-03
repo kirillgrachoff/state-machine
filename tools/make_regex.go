@@ -2,7 +2,6 @@ package tools
 
 import (
 	"fmt"
-	"log"
 	"sort"
 	"state-machine/edge_machine"
 	m "state-machine/machine"
@@ -42,7 +41,13 @@ func filterVertexEdges(edges []m.Edge, vertex m.State) (ingoing, loop, outgoing,
 	return
 }
 
-func MakeRegex(machine m.FinalStateMachine) string {
+func MakeRegex(machine m.FinalStateMachine) (ansRegex string, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			ansRegex = ""
+			err = fmt.Errorf("%v", r)
+		}
+	}()
 	edges := getEdges(machine)
 	edges = edgeToTerminate(edges)
 	machine = machineFromEdges(edges)
@@ -75,14 +80,14 @@ func MakeRegex(machine m.FinalStateMachine) string {
 	sort.Slice(ansRegexArray, func(i, j int) bool {
 		return ansRegexArray[i] < ansRegexArray[j]
 	})
-	ansRegex := ""
+	ansRegex = ""
 	for _, s := range ansRegexArray {
 		ansRegex += s
 	}
 	if len(ansRegex) > 0 {
 		ansRegex = ansRegex[1:]
 	}
-	return ansRegex
+	return ansRegex, nil
 }
 
 type innerState struct {
@@ -142,7 +147,7 @@ func deleteVertex(ingoing, loops, outgoing []m.Edge) []m.Edge {
 	middleRegexCnt := make(map[string]struct{})
 	for _, edge := range loops {
 		if edge.From.Number() != edge.To.Number() {
-			log.Fatalln("loop is not loop")
+			panic("loop is not a loop")
 		}
 		middleRegexCnt[edge.With] = struct{}{}
 	}
@@ -169,7 +174,7 @@ func deleteVertex(ingoing, loops, outgoing []m.Edge) []m.Edge {
 	for _, in := range ingoing {
 		for _, out := range outgoing {
 			if in.To.Number() != out.From.Number() {
-				log.Fatalln("input error")
+				panic("input error")
 			}
 			ans = append(ans, m.Edge{
 				in.From,

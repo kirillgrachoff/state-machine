@@ -95,7 +95,10 @@ func TestMakeRegex(t *testing.T) {
 
 		out := "(a((b))*)"
 
-		ans := MakeRegex(m)
+		ans, err := MakeRegex(m)
+		if err != nil {
+			t.Error(err)
+		}
 
 		if ans != out {
 			t.Fail()
@@ -111,7 +114,10 @@ func TestMakeRegex(t *testing.T) {
 
 		out := "()+(a)+(b)"
 
-		ans := MakeRegex(m)
+		ans, err := MakeRegex(m)
+		if err != nil {
+			t.Error(err)
+		}
 
 		if ans != out {
 			t.Fail()
@@ -129,8 +135,10 @@ func BenchmarkMakeRegex(b *testing.B) {
 
 	out := "()+(a)+(b)"
 	for testNo := 0; testNo < b.N; testNo++ {
-		ans := MakeRegex(m)
-		_ = ans
+		ans, err := MakeRegex(m)
+		if err != nil {
+			b.Error(err)
+		}
 		if ans != out {
 			b.Fail()
 		}

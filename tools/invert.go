@@ -5,8 +5,8 @@ import (
 	m "state-machine/machine"
 )
 
-func Invert(machine m.FinalStateMachine) m.FinalStateMachine {
-	return invert(machine)
+func Invert(machine m.FinalStateMachine) (m.FinalStateMachine, error) {
+	return invert(machine), nil
 }
 
 func invert(machine m.FinalStateMachine) *edge_machine.Machine {

@@ -8,9 +8,9 @@ import (
 
 const terminateVertex = uint(math.MaxUint)
 
-func FullMachine(alphabet string) func(machine m.FinalStateMachine) m.FinalStateMachine {
-	return func(machine m.FinalStateMachine) m.FinalStateMachine {
-		return fullMachine(alphabet)(machine)
+func FullMachine(alphabet string) func(machine m.FinalStateMachine) (m.FinalStateMachine, error) {
+	return func(machine m.FinalStateMachine) (m.FinalStateMachine, error) {
+		return fullMachine(alphabet)(machine), nil
 	}
 }
 

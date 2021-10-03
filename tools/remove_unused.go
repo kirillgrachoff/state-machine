@@ -6,8 +6,8 @@ import (
 	m "state-machine/machine"
 )
 
-func RemoveUnused(machine m.FinalStateMachine) m.FinalStateMachine {
-	return repaintVertices(removeUnused(machine))
+func RemoveUnused(machine m.FinalStateMachine) (m.FinalStateMachine, error) {
+	return repaintVertices(removeUnused(machine)), nil
 }
 
 func repaintVertices(machine m.FinalStateMachine) *edge_machine.Machine {
