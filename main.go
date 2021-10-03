@@ -12,7 +12,7 @@ type Job func(m.FinalStateMachine) m.FinalStateMachine
 func NewMachine(start, terminate []uint, transfers ...edge_machine.Edge) m.FinalStateMachine {
 	ans := make([]edge_machine.Edge, 0, len(transfers))
 	ans = append(ans, transfers...)
-	return edge_machine.NewMachine(ans, start, terminate)
+	return edge_machine.BuildNewMachine(ans, start, terminate)
 }
 
 func main() {

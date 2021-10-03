@@ -8,7 +8,7 @@ import (
 func newMachine(start, terminate []uint, transfers ...Edge) *Machine {
 	ans := make([]Edge, 0, len(transfers))
 	ans = append(ans, transfers...)
-	return NewMachine(ans, start, terminate)
+	return BuildNewMachine(ans, start, terminate)
 }
 
 func Equals(a, b []m.State) bool {

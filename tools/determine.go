@@ -1,7 +1,6 @@
 package tools
 
 import (
-	"sort"
 	edge "state-machine/edge_machine"
 	m "state-machine/machine"
 	"unsafe"
@@ -16,12 +15,12 @@ func determine(machine m.FinalStateMachine) *edge.Machine {
 	states := machine.States()
 	start := make([]uint, 0)
 	terminate := make([]uint, 0)
-	for _, s := range states {
-		if s.Terminate() {
-			terminate = append(terminate, s.Number())
+	for _, state := range states {
+		if state.Terminate() {
+			terminate = append(terminate, state.Number())
 		}
-		if s.Start() {
-			start = append(start, s.Number())
+		if state.Start() {
+			start = append(start, state.Number())
 		}
 	}
 	newEdges := make([]edge.Edge, 0)
@@ -30,22 +29,26 @@ func determine(machine m.FinalStateMachine) *edge.Machine {
 	used := make(map[uint]bool)
 	used[mask(start)] = true
 	for len(queue) > 0 {
-		v := queue[0]
+		vertex := queue[0]
 		queue = queue[1:]
 		alphabet := make(map[string]struct{})
-		vStates := toStates(v)
-		vMask := mask(v)
+		vStates := toStates(vertex)
+		vertexMask := mask(vertex)
 		for _, e := range machine.OutgoingEdges(vStates) {
 			alphabet[e.With] = struct{}{}
 		}
-		for w := range alphabet {
-			to := machine.GoBy(vStates, w)
+		for symbol := range alphabet {
+			to := machine.GoBy(vStates, symbol)
 			if len(to) == 0 {
 				continue
 			}
 			toUint := toUints(to)
 			toMask := mask(toUint)
-			newEdges = append(newEdges, edge.Edge{From: vMask, To: toMask, With: w})
+			newEdges = append(newEdges, edge.Edge{
+				From: vertexMask,
+				To:   toMask,
+				With: symbol,
+			})
 			if used[toMask] {
 				continue
 			}
@@ -54,12 +57,12 @@ func determine(machine m.FinalStateMachine) *edge.Machine {
 		}
 	}
 	startMap := make(map[uint]bool)
-	for _, v := range start {
-		startMap[v] = true
+	for _, state := range start {
+		startMap[state] = true
 	}
 	terminateMap := make(map[uint]bool)
-	for _, v := range start {
-		terminateMap[v] = true
+	for _, state := range terminate {
+		terminateMap[state] = true
 	}
 	newStart := make([]uint, 0)
 	newTerminate := make([]uint, 0)
@@ -82,45 +85,36 @@ func determine(machine m.FinalStateMachine) *edge.Machine {
 		return false
 	}
 
-	for _, e := range newEdges {
-		if isStartMask(e.From) {
-			newStart = append(newStart, e.From)
+	for _, edge := range newEdges {
+		if isStartMask(edge.From) {
+			newStart = append(newStart, edge.From)
 		}
-		if isStartMask(e.To) {
-			newStart = append(newStart, e.To)
+		if isStartMask(edge.To) {
+			newStart = append(newStart, edge.To)
 		}
-		if isTerminateMask(e.From) {
-			newTerminate = append(newTerminate, e.From)
+		if isTerminateMask(edge.From) {
+			newTerminate = append(newTerminate, edge.From)
 		}
-		if isTerminateMask(e.To) {
-			newTerminate = append(newTerminate, e.To)
+		if isTerminateMask(edge.To) {
+			newTerminate = append(newTerminate, edge.To)
 		}
 	}
-	return edge.NewMachine(newEdges, newStart, newTerminate)
+	return edge.BuildNewMachine(newEdges, newStart, newTerminate)
 }
 
 func toStates(args []uint) []m.State {
 	ans := make([]m.State, 0)
-	for _, v := range args {
-		ans = append(ans, innerState{Index: v})
+	for _, vertex := range args {
+		ans = append(ans, innerState{Index: vertex})
 	}
 	return ans
 }
 
 func toUints(args []m.State) []uint {
 	ans := make([]uint, 0)
-	for _, s := range args {
-		ans = append(ans, s.Number())
+	for _, state := range args {
+		ans = append(ans, state.Number())
 	}
-	return ans
-}
-
-func sorted(args []uint) []uint {
-	ans := make([]uint, len(args))
-	copy(ans, args)
-	sort.Slice(ans, func(i, j int) bool {
-		return ans[i] < ans[j]
-	})
 	return ans
 }
 

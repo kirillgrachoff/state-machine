@@ -29,7 +29,7 @@ func removeEpsilon(machine m.FinalStateMachine) (*edge.Machine, error) {
 		ans = append(ans, to...)
 	}
 	terminate = findTerminate(machine, terminate)
-	return edge.NewMachine(ans, start, terminate), nil
+	return edge.BuildNewMachine(ans, start, terminate), nil
 }
 
 // goByEmptyTransfers transforms all empty-string transfers from the state
@@ -63,22 +63,22 @@ func goByEmptyTransfers(machine m.FinalStateMachine, state m.State) []edge.Edge 
 // findTerminate finds all terminate vertices
 func findTerminate(machine m.FinalStateMachine, terminate []uint) []uint {
 	queue := make([]uint, 0, len(terminate))
-	for _, v := range terminate {
-		queue = append(queue, v)
+	for _, vertex := range terminate {
+		queue = append(queue, vertex)
 	}
 	used := make(map[uint]bool)
 	for len(queue) > 0 {
-		v := queue[0]
+		vertex := queue[0]
 		queue = queue[1:]
-		for _, e := range machine.IngoingEdges([]m.State{&edge.State{Index: v}}) {
-			if used[e.From.Number()] {
+		for _, edge := range machine.IngoingEdges([]m.State{&edge.State{Index: vertex}}) {
+			if used[edge.From.Number()] {
 				continue
 			}
-			used[e.From.Number()] = true
-			if e.With != "" {
+			used[edge.From.Number()] = true
+			if edge.With != "" {
 				continue
 			}
-			terminate = append(terminate, e.From.Number())
+			terminate = append(terminate, edge.From.Number())
 		}
 	}
 	return terminate

@@ -1,7 +1,6 @@
 package edge_machine
 
 import (
-	"log"
 	m "state-machine/machine"
 )
 
@@ -15,23 +14,23 @@ func NewCanonicalMachine(transfers []m.Edge) *Machine {
 	edges := make([]Edge, 0)
 	terminate := make([]uint, 0)
 	start := make([]uint, 0)
-	insert := func(s m.State) {
-		if s.Terminate() {
-			terminate = append(terminate, s.Number())
+	insert := func(state m.State) {
+		if state.Terminate() {
+			terminate = append(terminate, state.Number())
 		}
-		if s.Start() {
-			start = append(start, s.Number())
+		if state.Start() {
+			start = append(start, state.Number())
 		}
 	}
-	for _, e := range transfers {
-		insert(e.To)
-		insert(e.From)
-		edges = append(edges, Edge{e.From.Number(), e.To.Number(), e.With})
+	for _, edge := range transfers {
+		insert(edge.To)
+		insert(edge.From)
+		edges = append(edges, Edge{edge.From.Number(), edge.To.Number(), edge.With})
 	}
-	return NewMachine(edges, start, terminate)
+	return BuildNewMachine(edges, start, terminate)
 }
 
-func NewMachine(transfers []Edge, startVertices, terminateVertices []uint) *Machine {
+func BuildNewMachine(transfers []Edge, startVertices, terminateVertices []uint) *Machine {
 	machine := &Machine{
 		states:  make(map[uint]State),
 		mapping: make([]Edge, len(transfers), len(transfers)),
@@ -42,33 +41,38 @@ func NewMachine(transfers []Edge, startVertices, terminateVertices []uint) *Mach
 		isStart
 		isUsed
 	)
-	cnt := make(map[uint]uint)
-	for _, e := range transfers {
-		cnt[e.From] |= isUsed
-		cnt[e.To] |= isUsed
+	status := make(map[uint]uint)
+	for _, edge := range transfers {
+		status[edge.From] |= isUsed
+		status[edge.To] |= isUsed
 	}
-	for _, s := range startVertices {
-		cnt[s] |= isStart
+	for _, startVertex := range startVertices {
+		status[startVertex] |= isStart
 	}
-	for _, t := range terminateVertices {
-		cnt[t] |= isTerminate
+	for _, terminateVertex := range terminateVertices {
+		status[terminateVertex] |= isTerminate
 	}
-	for k, v := range cnt {
-		machine.states[k] = State{Index: k, End: (v & isTerminate) != 0, Begin: (v & isStart) != 0}
+	for number, summary := range status {
+		machine.states[number] = State{
+			Index: number,
+			End: (summary & isTerminate) != 0,
+			Begin: (summary & isStart) != 0,
+		}
 	}
 	return machine
 }
 
 func (machine Machine) Equals(other Machine) bool {
+	const usedTwice = 2
 	edgeCnt := make(map[Edge]uint)
-	for _, e := range machine.mapping {
-		edgeCnt[e]++
+	for _, edge := range machine.mapping {
+		edgeCnt[edge]++
 	}
-	for _, e := range other.mapping {
-		edgeCnt[e]++
+	for _, edge := range other.mapping {
+		edgeCnt[edge]++
 	}
 	for _, cnt := range edgeCnt {
-		if cnt != 2 {
+		if cnt != usedTwice {
 			return false
 		}
 	}
@@ -79,7 +83,7 @@ func (machine Machine) Equals(other Machine) bool {
 // it is guaranteed that its size not more than 1
 func (machine Machine) goByRune(from []m.State, with string) []m.State {
 	if len(with) > 1 {
-		log.Fatalln("transfer size is > 1")
+		panic("transfer size is > 1")
 	}
 	fromCnt := make(map[uint]bool)
 	for _, f := range from {
@@ -87,9 +91,9 @@ func (machine Machine) goByRune(from []m.State, with string) []m.State {
 	}
 
 	ans := make([]m.State, 0, 0)
-	for _, e := range machine.mapping {
-		if fromCnt[e.From] && e.With == with {
-			ans = append(ans, machine.states[e.To])
+	for _, edge := range machine.mapping {
+		if fromCnt[edge.From] && edge.With == with {
+			ans = append(ans, machine.states[edge.To])
 		}
 	}
 	return ans
@@ -102,16 +106,16 @@ func (machine Machine) GoBy(from []m.State, with string) []m.State {
 		return machine.goByRune(from, "")
 	}
 	ans := from
-	for _, c := range with {
-		ans = machine.goByRune(ans, string(c))
+	for _, symbol := range with {
+		ans = machine.goByRune(ans, string(symbol))
 	}
 	return ans
 }
 
 func (machine Machine) States() []m.State {
 	ans := make([]m.State, 0, len(machine.states))
-	for _, v := range machine.states {
-		ans = append(ans, v)
+	for _, state := range machine.states {
+		ans = append(ans, state)
 	}
 	return ans
 }
@@ -122,9 +126,13 @@ func (machine Machine) OutgoingEdges(from []m.State) []m.Edge {
 	for _, from := range from {
 		in[from.Number()] = true
 	}
-	for _, e := range machine.mapping {
-		if in[e.From] {
-			ans = append(ans, m.Edge{From: machine.states[e.From], To: machine.states[e.To], With: e.With})
+	for _, edge := range machine.mapping {
+		if in[edge.From] {
+			ans = append(ans, m.Edge{
+				From: machine.states[edge.From],
+				To: machine.states[edge.To],
+				With: edge.With,
+			})
 		}
 	}
 	return ans
@@ -136,9 +144,13 @@ func (machine Machine) IngoingEdges(to []m.State) []m.Edge {
 	for _, to := range to {
 		in[to.Number()] = true
 	}
-	for _, e := range machine.mapping {
-		if in[e.To] {
-			ans = append(ans, m.Edge{From: machine.states[e.From], To: machine.states[e.To], With: e.With})
+	for _, edge := range machine.mapping {
+		if in[edge.To] {
+			ans = append(ans, m.Edge{
+				From: machine.states[edge.From],
+				To: machine.states[edge.To],
+				With: edge.With,
+			})
 		}
 	}
 	return ans
@@ -150,13 +162,13 @@ type Edge struct {
 	With string
 }
 
-func NewEdgeMachine(e m.Edge) *Edge {
+func NewCanonicalEdge(e m.Edge) *Edge {
 	return &Edge{From: e.From.Number(), To: e.To.Number(), With: e.With}
 }
 
 func NewEdge(from State, to State, with string) *Edge {
 	if len(with) > 1 {
-		log.Fatalln("too big jump")
+		panic("too big jump")
 	}
 	return &Edge{from.Number(), to.Number(), with}
 }

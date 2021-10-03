@@ -1,7 +1,7 @@
 package tools
 
 import (
-	edge "state-machine/edge_machine"
+	"state-machine/edge_machine"
 	m "state-machine/machine"
 )
 
@@ -9,20 +9,20 @@ func Invert(machine m.FinalStateMachine) m.FinalStateMachine {
 	return invert(machine)
 }
 
-func invert(machine m.FinalStateMachine) *edge.Machine {
-	edges := make([]edge.Edge, 0)
+func invert(machine m.FinalStateMachine) *edge_machine.Machine {
+	edges := make([]edge_machine.Edge, 0)
 	start := make([]uint, 0)
 	terminate := make([]uint, 0)
-	for _, s := range machine.States() {
-		if s.Start() {
-			start = append(start, s.Number())
+	for _, state := range machine.States() {
+		if state.Start() {
+			start = append(start, state.Number())
 		}
-		if !s.Terminate() {
-			terminate = append(terminate, s.Number())
+		if !state.Terminate() {
+			terminate = append(terminate, state.Number())
 		}
-		for _, e := range machine.OutgoingEdges([]m.State{s}) {
-			edges = append(edges, *edge.NewEdgeMachine(e))
+		for _, edge := range machine.OutgoingEdges([]m.State{state}) {
+			edges = append(edges, *edge_machine.NewCanonicalEdge(edge))
 		}
 	}
-	return edge.NewMachine(edges, start, terminate)
+	return edge_machine.BuildNewMachine(edges, start, terminate)
 }
