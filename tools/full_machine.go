@@ -8,9 +8,9 @@ import (
 
 const terminateVertex = uint(math.MaxUint)
 
-func FullMachine(alphabet string) func(machine m.FinalStateMachine) m.FinalStateMachine {
-	return func(machine m.FinalStateMachine) m.FinalStateMachine {
-		return fullMachine(alphabet)(machine)
+func FullMachine(alphabet string) func(machine m.FinalStateMachine) (m.FinalStateMachine, error) {
+	return func(machine m.FinalStateMachine) (m.FinalStateMachine, error) {
+		return fullMachine(alphabet)(machine), nil
 	}
 }
 
@@ -18,33 +18,41 @@ func fullMachine(alphabet string) func(machine m.FinalStateMachine) *edge.Machin
 	return func(machine m.FinalStateMachine) *edge.Machine {
 		start := make([]uint, 0)
 		terminate := make([]uint, 0)
-		for _, s := range machine.States() {
-			if s.Start() {
-				start = append(start, s.Number())
+		for _, state := range machine.States() {
+			if state.Start() {
+				start = append(start, state.Number())
 			}
-			if s.Terminate() {
-				terminate = append(terminate, s.Number())
+			if state.Terminate() {
+				terminate = append(terminate, state.Number())
 			}
 		}
 		edges := make([]edge.Edge, 0)
 		used := make(map[uint]bool)
-		for _, s := range machine.States() {
-			used[s.Number()] = true
+		for _, state := range machine.States() {
+			used[state.Number()] = true
 			hasEdges := make(map[string]bool)
-			for _, e := range machine.OutgoingEdges([]m.State{s}) {
+			for _, e := range machine.OutgoingEdges([]m.State{state}) {
 				hasEdges[e.With] = true
-				edges = append(edges, *edge.NewEdgeMachine(e))
+				edges = append(edges, *edge.NewCanonicalEdge(e))
 			}
-			for _, c := range alphabet {
-				if hasEdges[string(c)] {
+			for _, symbol := range alphabet {
+				if hasEdges[string(symbol)] {
 					continue
 				}
-				edges = append(edges, edge.Edge{From: s.Number(), To: terminateVertex, With: string(c)})
+				edges = append(edges, edge.Edge{
+					From: state.Number(),
+					To: terminateVertex,
+					With: string(symbol),
+				})
 			}
 		}
-		for _, c := range alphabet {
-			edges = append(edges, edge.Edge{From: terminateVertex, To: terminateVertex, With: string(c)})
+		for _, symbol := range alphabet {
+			edges = append(edges, edge.Edge{
+				From: terminateVertex,
+				To: terminateVertex,
+				With: string(symbol),
+			})
 		}
-		return edge.NewMachine(edges, start, terminate)
+		return edge.BuildNewMachine(edges, start, terminate)
 	}
 }

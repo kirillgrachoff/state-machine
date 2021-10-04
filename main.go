@@ -2,17 +2,18 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"state-machine/edge_machine"
 	m "state-machine/machine"
 	"state-machine/tools"
 )
 
-type Job func(m.FinalStateMachine) m.FinalStateMachine
+type Job func(m.FinalStateMachine) (m.FinalStateMachine, error)
 
 func NewMachine(start, terminate []uint, transfers ...edge_machine.Edge) m.FinalStateMachine {
 	ans := make([]edge_machine.Edge, 0, len(transfers))
 	ans = append(ans, transfers...)
-	return edge_machine.NewMachine(ans, start, terminate)
+	return edge_machine.BuildNewMachine(ans, start, terminate)
 }
 
 func main() {
@@ -25,7 +26,8 @@ func main() {
 		edge_machine.Edge{1, 3, "b"},
 	)
 
-	machine = PipelineSeq(
+	var err error
+	machine, err = PipelineSeq(
 		machine,
 		tools.RemoveEpsilon,
 		tools.RemoveUnused,
@@ -35,20 +37,31 @@ func main() {
 		tools.Invert,
 	)
 
-	ans := tools.MakeRegex(machine)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	ans, err := tools.MakeRegex(machine)
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	fmt.Println(ans)
 }
 
-func PipelineSeq(machine m.FinalStateMachine, seq ...Job) m.FinalStateMachine {
+func PipelineSeq(machine m.FinalStateMachine, seq ...Job) (m.FinalStateMachine, error) {
 	args := make([]Job, 0)
 	args = append(args, seq...)
 	return Pipeline(machine, args)
 }
 
-func Pipeline(machine m.FinalStateMachine, seq []Job) m.FinalStateMachine {
+func Pipeline(machine m.FinalStateMachine, seq []Job) (m.FinalStateMachine, error) {
 	for _, command := range seq {
-		machine = command(machine)
+		var err error
+		machine, err = command(machine)
+		if err != nil {
+			return nil, err
+		}
 	}
-	return machine
+	return machine, nil
 }

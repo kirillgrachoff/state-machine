@@ -2,65 +2,52 @@ package tools
 
 import (
 	"fmt"
-	"log"
 	"sort"
-	edge "state-machine/edge_machine"
+	"state-machine/edge_machine"
 	m "state-machine/machine"
 )
 
 func machineFromEdges(edges []m.Edge) m.FinalStateMachine {
-	return edge.NewCanonicalMachine(edges)
+	return edge_machine.NewCanonicalMachine(edges)
 }
 
 func getEdges(machine m.FinalStateMachine) []m.Edge {
 	ans := make([]m.Edge, 0)
-	for _, s := range machine.States() {
-		for _, e := range machine.OutgoingEdges([]m.State{s}) {
-			ans = append(ans, e)
+	for _, state := range machine.States() {
+		for _, edge := range machine.OutgoingEdges([]m.State{state}) {
+			ans = append(ans, edge)
 		}
 	}
 	return ans
 }
 
-func filterVertexEdges(edges []m.Edge, v m.State) (left, loop, right, remain []m.Edge) {
-	left = make([]m.Edge, 0)
+func filterVertexEdges(edges []m.Edge, vertex m.State) (ingoing, loop, outgoing, remain []m.Edge) {
+	ingoing = make([]m.Edge, 0)
 	loop = make([]m.Edge, 0)
-	right = make([]m.Edge, 0)
+	outgoing = make([]m.Edge, 0)
+	// remain is for that edges which are not connected with vertex
 	remain = make([]m.Edge, 0)
-	for _, e := range edges {
-		if e.From.Number() == v.Number() && e.To.Number() == v.Number() {
-			loop = append(loop, e)
-		} else if e.From.Number() == v.Number() {
-			right = append(right, e)
-		} else if e.To.Number() == v.Number() {
-			left = append(left, e)
+	for _, edge := range edges {
+		if edge.From.Number() == vertex.Number() && edge.To.Number() == vertex.Number() {
+			loop = append(loop, edge)
+		} else if edge.From.Number() == vertex.Number() {
+			outgoing = append(outgoing, edge)
+		} else if edge.To.Number() == vertex.Number() {
+			ingoing = append(ingoing, edge)
 		} else {
-			remain = append(remain, e)
+			remain = append(remain, edge)
 		}
 	}
 	return
 }
 
-func getIngoingLoopsOutgoing(machine m.FinalStateMachine, v m.State) (left, loop, right []m.Edge) {
-	left = make([]m.Edge, 0)
-	loop = make([]m.Edge, 0)
-	right = make([]m.Edge, 0)
-	for _, e := range machine.IngoingEdges([]m.State{v}) {
-		if e.From.Number() != e.To.Number() {
-			left = append(left, e)
-		} else {
-			loop = append(loop, e)
+func MakeRegex(machine m.FinalStateMachine) (ansRegex string, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			ansRegex = ""
+			err = fmt.Errorf("%v", r)
 		}
-	}
-	for _, e := range machine.OutgoingEdges([]m.State{v}) {
-		if e.From.Number() != e.To.Number() {
-			right = append(right, e)
-		}
-	}
-	return
-}
-
-func MakeRegex(machine m.FinalStateMachine) string {
+	}()
 	edges := getEdges(machine)
 	edges = edgeToTerminate(edges)
 	machine = machineFromEdges(edges)
@@ -68,39 +55,39 @@ func MakeRegex(machine m.FinalStateMachine) string {
 	sort.Slice(states, func(i, j int) bool {
 		return states[i].Number() < states[j].Number()
 	})
-	for _, s := range states {
-		if s.Terminate() {
+	for _, state := range states {
+		if state.Terminate() {
 			continue
 		}
-		if s.Start() {
+		if state.Start() {
 			continue
 		}
-		left, loop, right, edgesV := filterVertexEdges(edges, s)
-		nEdges := deleteVertex(left, loop, right)
+		left, loop, right, edgesV := filterVertexEdges(edges, state)
+		newEdges := deleteVertex(left, loop, right)
 		edges = edgesV
-		for _, v := range nEdges {
-			edges = append(edges, v)
+		for _, vertex := range newEdges {
+			edges = append(edges, vertex)
 		}
 	}
-	ansCnt := make(map[string]struct{})
-	for _, e := range edges {
-		ansCnt[fmt.Sprintf("+(%v)", e.With)] = struct{}{}
+	ansRegexMap := make(map[string]struct{})
+	for _, edge := range edges {
+		ansRegexMap[fmt.Sprintf("+(%v)", edge.With)] = struct{}{}
 	}
-	ansArray := make([]string, 0)
-	for s := range ansCnt {
-		ansArray = append(ansArray, s)
+	ansRegexArray := make([]string, 0)
+	for state := range ansRegexMap {
+		ansRegexArray = append(ansRegexArray, state)
 	}
-	sort.Slice(ansArray, func(i, j int) bool {
-		return ansArray[i] < ansArray[j]
+	sort.Slice(ansRegexArray, func(i, j int) bool {
+		return ansRegexArray[i] < ansRegexArray[j]
 	})
-	ans := ""
-	for _, s := range ansArray {
-		ans += s
+	ansRegex = ""
+	for _, s := range ansRegexArray {
+		ansRegex += s
 	}
-	if len(ans) > 0 {
-		ans = ans[1:]
+	if len(ansRegex) > 0 {
+		ansRegex = ansRegex[1:]
 	}
-	return ans
+	return ansRegex, nil
 }
 
 type innerState struct {
@@ -136,21 +123,21 @@ func edgeToTerminate(edges []m.Edge) (ans []m.Edge) {
 			"",
 		})
 	}
-	for _, e := range edges {
-		linkToTerminate(e.From)
-		linkToTerminate(e.To)
+	for _, edge := range edges {
+		linkToTerminate(edge.From)
+		linkToTerminate(edge.To)
 		ans = append(ans, m.Edge{
 			From: innerState{
-				e.From.Number(),
+				edge.From.Number(),
 				false,
-				e.From.Start(),
+				edge.From.Start(),
 			},
 			To: innerState{
-				e.To.Number(),
+				edge.To.Number(),
 				false,
-				e.To.Start(),
+				edge.To.Start(),
 			},
-			With: e.With,
+			With: edge.With,
 		})
 	}
 	return
@@ -158,11 +145,11 @@ func edgeToTerminate(edges []m.Edge) (ans []m.Edge) {
 
 func deleteVertex(ingoing, loops, outgoing []m.Edge) []m.Edge {
 	middleRegexCnt := make(map[string]struct{})
-	for _, e := range loops {
-		if e.From.Number() != e.To.Number() {
-			log.Fatalln("loop is not loop")
+	for _, edge := range loops {
+		if edge.From.Number() != edge.To.Number() {
+			panic("loop is not a loop")
 		}
-		middleRegexCnt[e.With] = struct{}{}
+		middleRegexCnt[edge.With] = struct{}{}
 	}
 	var middleRegex string
 	{
@@ -187,9 +174,13 @@ func deleteVertex(ingoing, loops, outgoing []m.Edge) []m.Edge {
 	for _, in := range ingoing {
 		for _, out := range outgoing {
 			if in.To.Number() != out.From.Number() {
-				log.Fatalln("input error")
+				panic("input error")
 			}
-			ans = append(ans, m.Edge{in.From, out.To, fmt.Sprintf("%v%v%v", in.With, middleRegex, out.With)})
+			ans = append(ans, m.Edge{
+				in.From,
+				out.To,
+				fmt.Sprintf("%v%v%v", in.With, middleRegex, out.With),
+			})
 		}
 	}
 	return ans
