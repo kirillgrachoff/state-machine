@@ -18,12 +18,10 @@ func NewMachine(start, terminate []uint, transfers ...edge_machine.Edge) m.Final
 
 func main() {
 	machine := NewMachine(
-		[]uint{0, 1},
-		[]uint{2, 3},
-		edge_machine.Edge{0, 1, ""},
-		edge_machine.Edge{1, 2, "a"},
-		edge_machine.Edge{1, 2, "b"},
-		edge_machine.Edge{1, 3, "b"},
+		[]uint{0},
+		[]uint{1},
+		edge_machine.Edge{0, 0, "a"},
+		edge_machine.Edge{0, 1, "b"},
 	)
 
 	var err error
@@ -34,7 +32,7 @@ func main() {
 		tools.Determine,
 		tools.FullMachine("ab"),
 		tools.RemoveUnused,
-		tools.Invert,
+		//tools.Invert,
 	)
 
 	if err != nil {
