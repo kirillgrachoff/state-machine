@@ -13,7 +13,7 @@ func TestFullMachine(t *testing.T) {
 		edge.Edge{0, 1, "a"},
 	)
 
-	v := terminateVertex
+	v := sinkVertex
 
 	out := newMachine(
 		[]uint{0},

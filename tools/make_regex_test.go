@@ -112,7 +112,7 @@ func TestMakeRegex(t *testing.T) {
 			edge.Edge{1, 2, "b"},
 		)
 
-		out := "()+(a)+(b)"
+		out := "()+(a)+(ab)+(b)"
 
 		ans, err := MakeRegex(m)
 		if err != nil {
