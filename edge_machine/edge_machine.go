@@ -90,7 +90,7 @@ func (machine Machine) goByRune(from []m.State, with string) []m.State {
 		fromCnt[f.Number()] = true
 	}
 
-	ans := make([]m.State, 0, 0)
+	ans := make([]m.State, 0)
 	for _, edge := range machine.mapping {
 		if fromCnt[edge.From] && edge.With == with {
 			ans = append(ans, machine.states[edge.To])
