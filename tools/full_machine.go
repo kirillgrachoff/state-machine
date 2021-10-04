@@ -6,7 +6,11 @@ import (
 	m "state-machine/machine"
 )
 
-const terminateVertex = uint(math.MaxUint)
+const (
+	terminateVertex = uint(math.MaxUint - iota)
+	startVertex
+	sinkVertex
+)
 
 func FullMachine(alphabet string) func(machine m.FinalStateMachine) (m.FinalStateMachine, error) {
 	return func(machine m.FinalStateMachine) (m.FinalStateMachine, error) {
@@ -41,15 +45,15 @@ func fullMachine(alphabet string) func(machine m.FinalStateMachine) *edge.Machin
 				}
 				edges = append(edges, edge.Edge{
 					From: state.Number(),
-					To: terminateVertex,
+					To: sinkVertex,
 					With: string(symbol),
 				})
 			}
 		}
 		for _, symbol := range alphabet {
 			edges = append(edges, edge.Edge{
-				From: terminateVertex,
-				To: terminateVertex,
+				From: sinkVertex,
+				To: sinkVertex,
 				With: string(symbol),
 			})
 		}

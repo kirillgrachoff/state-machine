@@ -50,6 +50,7 @@ func MakeRegex(machine m.FinalStateMachine) (ansRegex string, err error) {
 	}()
 	edges := getEdges(machine)
 	edges = edgeToTerminate(edges)
+	edges = edgeFromStart(edges)
 	machine = machineFromEdges(edges)
 	states := machine.States()
 	sort.Slice(states, func(i, j int) bool {
@@ -106,6 +107,41 @@ func (i innerState) Start() bool {
 
 func (i innerState) Terminate() bool {
 	return i.End
+}
+
+func edgeFromStart(edges []m.Edge) (ans []m.Edge) {
+	start := innerState{startVertex, false, true}
+	ans = make([]m.Edge, 0)
+	used := make(map[uint]bool)
+	linkFromStart := func(v m.State) {
+		if used[v.Number()] || !v.Start() {
+			return
+		}
+		used[v.Number()] = true
+		ans = append(ans, m.Edge{
+			start,
+			innerState{v.Number(), v.Terminate(), false},
+			"",
+		})
+	}
+	for _, edge := range edges {
+		linkFromStart(edge.From)
+		linkFromStart(edge.To)
+		ans = append(ans, m.Edge{
+			From: innerState{
+				edge.From.Number(),
+				edge.From.Terminate(),
+				false,
+			},
+			To: innerState{
+				edge.To.Number(),
+				edge.To.Terminate(),
+				false,
+			},
+			With: edge.With,
+		})
+	}
+	return
 }
 
 func edgeToTerminate(edges []m.Edge) (ans []m.Edge) {
