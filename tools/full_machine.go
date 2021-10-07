@@ -36,7 +36,7 @@ func fullMachine(alphabet string) func(machine m.FiniteStateMachine) *edge.Machi
 				}
 				edges = append(edges, edge.Edge{
 					From: state.Number(),
-					To: sinkVertex,
+					To:   sinkVertex,
 					With: string(symbol),
 				})
 			}
@@ -44,7 +44,7 @@ func fullMachine(alphabet string) func(machine m.FiniteStateMachine) *edge.Machi
 		for _, symbol := range alphabet {
 			edges = append(edges, edge.Edge{
 				From: sinkVertex,
-				To: sinkVertex,
+				To:   sinkVertex,
 				With: string(symbol),
 			})
 		}
