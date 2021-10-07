@@ -27,3 +27,17 @@ type DeterminedStateMachine interface {
 	FiniteStateMachine
 	Match(str string) bool
 }
+
+func SeparateStates(states []State) (start []uint, terminate []uint) {
+	start = make([]uint, 0)
+	terminate = make([]uint, 0)
+	for _, state := range states {
+		if state.Terminate() {
+			terminate = append(terminate, state.Number())
+		}
+		if state.Start() {
+			start = append(start, state.Number())
+		}
+	}
+	return
+}

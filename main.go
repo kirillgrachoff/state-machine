@@ -27,7 +27,7 @@ func main() {
 	var err error
 	machine, err = PipelineSeq(
 		machine,
-		tools.RemoveEpsilon,
+		tools.RemoveEmptySymbols,
 		tools.RemoveUnused,
 		tools.Determine,
 		tools.FullMachine("ab"),

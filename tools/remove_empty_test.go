@@ -29,7 +29,7 @@ func TestEpsilonRemoval(t *testing.T) {
 		edge.Edge{1, 3, "a"},
 		edge.Edge{2, 3, "b"},
 	)
-	ans, err := removeEpsilon(m)
+	ans, err := removeEmptySymbols(m)
 	if err != nil {
 		t.Error(err)
 	}
@@ -40,7 +40,7 @@ func TestEpsilonRemoval(t *testing.T) {
 
 func TestEmptyGraph(t *testing.T) {
 	m := newMachine([]uint{0}, []uint{})
-	ans, err := removeEpsilon(m)
+	ans, err := removeEmptySymbols(m)
 	if err != nil {
 		t.Error(err)
 	}
@@ -59,7 +59,7 @@ func TestRemoveTerminate(t *testing.T) {
 		edge.Edge{3, 4, "a"},
 	)
 
-	ans, err := removeEpsilon(m)
+	ans, err := removeEmptySymbols(m)
 
 	if err != nil {
 		t.Error(err)

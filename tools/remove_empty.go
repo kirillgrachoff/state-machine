@@ -5,15 +5,15 @@ import (
 	m "state-machine/machine"
 )
 
-func RemoveEpsilon(machine m.FiniteStateMachine) (m.FiniteStateMachine, error) {
-	ans, err := removeEpsilon(machine)
+func RemoveEmptySymbols(machine m.FiniteStateMachine) (m.FiniteStateMachine, error) {
+	ans, err := removeEmptySymbols(machine)
 	if err != nil {
 		return nil, err
 	}
 	return ans, nil
 }
 
-func removeEpsilon(machine m.FiniteStateMachine) (*edge.Machine, error) {
+func removeEmptySymbols(machine m.FiniteStateMachine) (*edge.Machine, error) {
 	ans := make([]edge.Edge, 0)
 	start := make([]uint, 0, 1)
 	terminate := make([]uint, 0, 0)

@@ -20,16 +20,7 @@ func FullMachine(alphabet string) func(machine m.FiniteStateMachine) (m.FiniteSt
 
 func fullMachine(alphabet string) func(machine m.FiniteStateMachine) *edge.Machine {
 	return func(machine m.FiniteStateMachine) *edge.Machine {
-		start := make([]uint, 0)
-		terminate := make([]uint, 0)
-		for _, state := range machine.States() {
-			if state.Start() {
-				start = append(start, state.Number())
-			}
-			if state.Terminate() {
-				terminate = append(terminate, state.Number())
-			}
-		}
+		start, terminate := m.SeparateStates(machine.States())
 		edges := make([]edge.Edge, 0)
 		used := make(map[uint]bool)
 		for _, state := range machine.States() {
