@@ -5,15 +5,15 @@ import (
 	m "state-machine/machine"
 )
 
-func RemoveEpsilon(machine m.FinalStateMachine) (m.FinalStateMachine, error) {
-	ans, err := removeEpsilon(machine)
+func RemoveEmptySymbols(machine m.FiniteStateMachine) (m.FiniteStateMachine, error) {
+	ans, err := removeEmptySymbols(machine)
 	if err != nil {
 		return nil, err
 	}
 	return ans, nil
 }
 
-func removeEpsilon(machine m.FinalStateMachine) (*edge.Machine, error) {
+func removeEmptySymbols(machine m.FiniteStateMachine) (*edge.Machine, error) {
 	ans := make([]edge.Edge, 0)
 	start := make([]uint, 0, 1)
 	terminate := make([]uint, 0, 0)
@@ -32,7 +32,7 @@ func removeEpsilon(machine m.FinalStateMachine) (*edge.Machine, error) {
 }
 
 // goByEmptyTransfers transforms all empty-string transfers from the state
-func goByEmptyTransfers(machine m.FinalStateMachine, state m.State) []edge.Edge {
+func goByEmptyTransfers(machine m.FiniteStateMachine, state m.State) []edge.Edge {
 
 	finalEdges := make([]edge.Edge, 0)
 	used := make(map[uint]bool)
@@ -60,7 +60,7 @@ func goByEmptyTransfers(machine m.FinalStateMachine, state m.State) []edge.Edge 
 }
 
 // findTerminate finds all terminate vertices
-func findTerminate(machine m.FinalStateMachine, terminate []uint) []uint {
+func findTerminate(machine m.FiniteStateMachine, terminate []uint) []uint {
 	queue := make([]uint, 0, len(terminate))
 	for _, vertex := range terminate {
 		queue = append(queue, vertex)

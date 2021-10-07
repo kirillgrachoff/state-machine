@@ -12,24 +12,15 @@ const (
 	sinkVertex
 )
 
-func FullMachine(alphabet string) func(machine m.FinalStateMachine) (m.FinalStateMachine, error) {
-	return func(machine m.FinalStateMachine) (m.FinalStateMachine, error) {
+func FullMachine(alphabet string) func(machine m.FiniteStateMachine) (m.FiniteStateMachine, error) {
+	return func(machine m.FiniteStateMachine) (m.FiniteStateMachine, error) {
 		return fullMachine(alphabet)(machine), nil
 	}
 }
 
-func fullMachine(alphabet string) func(machine m.FinalStateMachine) *edge.Machine {
-	return func(machine m.FinalStateMachine) *edge.Machine {
-		start := make([]uint, 0)
-		terminate := make([]uint, 0)
-		for _, state := range machine.States() {
-			if state.Start() {
-				start = append(start, state.Number())
-			}
-			if state.Terminate() {
-				terminate = append(terminate, state.Number())
-			}
-		}
+func fullMachine(alphabet string) func(machine m.FiniteStateMachine) *edge.Machine {
+	return func(machine m.FiniteStateMachine) *edge.Machine {
+		start, terminate := m.SeparateStates(machine.States())
 		edges := make([]edge.Edge, 0)
 		used := make(map[uint]bool)
 		for _, state := range machine.States() {
@@ -45,7 +36,7 @@ func fullMachine(alphabet string) func(machine m.FinalStateMachine) *edge.Machin
 				}
 				edges = append(edges, edge.Edge{
 					From: state.Number(),
-					To: sinkVertex,
+					To:   sinkVertex,
 					With: string(symbol),
 				})
 			}
@@ -53,7 +44,7 @@ func fullMachine(alphabet string) func(machine m.FinalStateMachine) *edge.Machin
 		for _, symbol := range alphabet {
 			edges = append(edges, edge.Edge{
 				From: sinkVertex,
-				To: sinkVertex,
+				To:   sinkVertex,
 				With: string(symbol),
 			})
 		}

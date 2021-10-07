@@ -8,9 +8,9 @@ import (
 	"state-machine/tools"
 )
 
-type Job func(m.FinalStateMachine) (m.FinalStateMachine, error)
+type Job func(m.FiniteStateMachine) (m.FiniteStateMachine, error)
 
-func NewMachine(start, terminate []uint, transfers ...edge_machine.Edge) m.FinalStateMachine {
+func NewMachine(start, terminate []uint, transfers ...edge_machine.Edge) m.FiniteStateMachine {
 	ans := make([]edge_machine.Edge, 0, len(transfers))
 	ans = append(ans, transfers...)
 	return edge_machine.BuildNewMachine(ans, start, terminate)
@@ -27,7 +27,7 @@ func main() {
 	var err error
 	machine, err = PipelineSeq(
 		machine,
-		tools.RemoveEpsilon,
+		tools.RemoveEmptySymbols,
 		tools.RemoveUnused,
 		tools.Determine,
 		tools.FullMachine("ab"),
@@ -47,13 +47,13 @@ func main() {
 	fmt.Println(ans)
 }
 
-func PipelineSeq(machine m.FinalStateMachine, seq ...Job) (m.FinalStateMachine, error) {
+func PipelineSeq(machine m.FiniteStateMachine, seq ...Job) (m.FiniteStateMachine, error) {
 	args := make([]Job, 0)
 	args = append(args, seq...)
 	return Pipeline(machine, args)
 }
 
-func Pipeline(machine m.FinalStateMachine, seq []Job) (m.FinalStateMachine, error) {
+func Pipeline(machine m.FiniteStateMachine, seq []Job) (m.FiniteStateMachine, error) {
 	for _, command := range seq {
 		var err error
 		machine, err = command(machine)
