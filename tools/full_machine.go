@@ -12,14 +12,14 @@ const (
 	sinkVertex
 )
 
-func FullMachine(alphabet string) func(machine m.FinalStateMachine) (m.FinalStateMachine, error) {
-	return func(machine m.FinalStateMachine) (m.FinalStateMachine, error) {
+func FullMachine(alphabet string) func(machine m.FiniteStateMachine) (m.FiniteStateMachine, error) {
+	return func(machine m.FiniteStateMachine) (m.FiniteStateMachine, error) {
 		return fullMachine(alphabet)(machine), nil
 	}
 }
 
-func fullMachine(alphabet string) func(machine m.FinalStateMachine) *edge.Machine {
-	return func(machine m.FinalStateMachine) *edge.Machine {
+func fullMachine(alphabet string) func(machine m.FiniteStateMachine) *edge.Machine {
+	return func(machine m.FiniteStateMachine) *edge.Machine {
 		start := make([]uint, 0)
 		terminate := make([]uint, 0)
 		for _, state := range machine.States() {

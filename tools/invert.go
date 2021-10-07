@@ -5,11 +5,11 @@ import (
 	m "state-machine/machine"
 )
 
-func Invert(machine m.FinalStateMachine) (m.FinalStateMachine, error) {
+func Invert(machine m.FiniteStateMachine) (m.FiniteStateMachine, error) {
 	return invert(machine), nil
 }
 
-func invert(machine m.FinalStateMachine) *edge_machine.Machine {
+func invert(machine m.FiniteStateMachine) *edge_machine.Machine {
 	edges := make([]edge_machine.Edge, 0)
 	start := make([]uint, 0)
 	terminate := make([]uint, 0)

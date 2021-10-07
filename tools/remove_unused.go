@@ -6,11 +6,11 @@ import (
 	m "state-machine/machine"
 )
 
-func RemoveUnused(machine m.FinalStateMachine) (m.FinalStateMachine, error) {
+func RemoveUnused(machine m.FiniteStateMachine) (m.FiniteStateMachine, error) {
 	return repaintVertices(removeUnused(machine)), nil
 }
 
-func repaintVertices(machine m.FinalStateMachine) *edge_machine.Machine {
+func repaintVertices(machine m.FiniteStateMachine) *edge_machine.Machine {
 	states := machine.States()
 	sort.Slice(states, func(i, j int) bool {
 		return states[i].Number() < states[j].Number()
@@ -40,7 +40,7 @@ func repaintVertices(machine m.FinalStateMachine) *edge_machine.Machine {
 	return edge_machine.BuildNewMachine(edges, start, terminate)
 }
 
-func removeUnused(machine m.FinalStateMachine) *edge_machine.Machine {
+func removeUnused(machine m.FiniteStateMachine) *edge_machine.Machine {
 	start := make([]uint, 0, 1)
 	terminate := make([]uint, 0, 1)
 	states := machine.States()

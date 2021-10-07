@@ -7,11 +7,11 @@ import (
 	m "state-machine/machine"
 )
 
-func machineFromEdges(edges []m.Edge) m.FinalStateMachine {
+func machineFromEdges(edges []m.Edge) m.FiniteStateMachine {
 	return edge_machine.NewCanonicalMachine(edges)
 }
 
-func getEdges(machine m.FinalStateMachine) []m.Edge {
+func getEdges(machine m.FiniteStateMachine) []m.Edge {
 	ans := make([]m.Edge, 0)
 	for _, state := range machine.States() {
 		for _, edge := range machine.OutgoingEdges([]m.State{state}) {
@@ -41,7 +41,7 @@ func filterVertexEdges(edges []m.Edge, vertex m.State) (ingoing, loop, outgoing,
 	return
 }
 
-func MakeRegex(machine m.FinalStateMachine) (ansRegex string, err error) {
+func MakeRegex(machine m.FiniteStateMachine) (ansRegex string, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			ansRegex = ""

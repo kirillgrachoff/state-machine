@@ -7,11 +7,11 @@ import (
 )
 
 // Determine is a function which removes all ambiguous transfers
-func Determine(machine m.FinalStateMachine) (m.FinalStateMachine, error) {
+func Determine(machine m.FiniteStateMachine) (m.FiniteStateMachine, error) {
 	return determine(machine), nil
 }
 
-func determine(machine m.FinalStateMachine) *edge.Machine {
+func determine(machine m.FiniteStateMachine) *edge.Machine {
 	states := machine.States()
 	start := make([]uint, 0)
 	terminate := make([]uint, 0)
