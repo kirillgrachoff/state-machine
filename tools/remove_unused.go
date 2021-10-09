@@ -58,17 +58,21 @@ func removeUnused(machine m.FiniteStateMachine) *edge_machine.Machine {
 		queue = append(queue, state)
 		used[state] = true
 	}
-	newEdges := make([]edge_machine.Edge, 0)
+	newEdges := make(map[edge_machine.Edge]struct{})
 	for len(queue) > 0 {
 		vertex := queue[0]
 		queue = queue[1:]
 		used[vertex] = true
 		for _, edge := range machine.OutgoingEdges([]m.State{&edge_machine.State{Index: vertex}}) {
-			newEdges = append(newEdges, *edge_machine.NewCanonicalEdge(edge))
+			newEdges[*edge_machine.NewCanonicalEdge(edge)] = struct{}{}
 			if !used[edge.To.Number()] {
 				queue = append(queue, edge.To.Number())
 			}
 		}
 	}
-	return edge_machine.BuildNewMachine(newEdges, start, terminate)
+	newEdgesList := make([]edge_machine.Edge, 0, len(newEdges))
+	for edge := range newEdges {
+		newEdgesList = append(newEdgesList, edge)
+	}
+	return edge_machine.BuildNewMachine(newEdgesList, start, terminate)
 }

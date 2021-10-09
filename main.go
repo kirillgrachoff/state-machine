@@ -5,6 +5,7 @@ import (
 	"log"
 	"state-machine/edge_machine"
 	m "state-machine/machine"
+	"state-machine/predefines"
 	"state-machine/tools"
 )
 
@@ -30,9 +31,10 @@ func main() {
 		tools.RemoveEmptySymbols,
 		tools.RemoveUnused,
 		tools.Determine,
-		tools.FullMachine("ab"),
+		tools.FullMachine(predefines.Alphabet),
 		tools.RemoveUnused,
-		//tools.Invert,
+		tools.Minimize,
+		tools.Invert,
 	)
 
 	if err != nil {
