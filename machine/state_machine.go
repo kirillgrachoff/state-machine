@@ -16,7 +16,8 @@ type Edge struct {
 
 // FiniteStateMachine is a finite automaton
 type FiniteStateMachine interface {
-    GoBy(from []State, with string) []State
+	GoBackwardBy(to []State, with string) []State
+    GoForwardBy(from []State, with string) []State
 	OutgoingEdges(from []State) []Edge
 	IngoingEdges(to []State) []Edge
 	States() []State

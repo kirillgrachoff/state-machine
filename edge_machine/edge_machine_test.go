@@ -37,13 +37,13 @@ func TestEmptyTransfers(t *testing.T) {
 	ans1 := []m.State{
 		State{Index: 1},
 	}
-	if !Equals(m1.GoBy([]m.State{State{Index: 0}}, ""), ans1) {
+	if !Equals(m1.GoForwardBy([]m.State{State{Index: 0}}, ""), ans1) {
 		t.Fail()
 	}
 	ans2 := []m.State{
 		State{Index: 2},
 	}
-	if !Equals(m1.GoBy([]m.State{State{Index: 1}}, ""), ans2) {
+	if !Equals(m1.GoForwardBy([]m.State{State{Index: 1}}, ""), ans2) {
 		t.Fail()
 	}
 }
