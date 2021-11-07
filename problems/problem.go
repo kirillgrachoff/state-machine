@@ -12,12 +12,12 @@ func FindLongestSuffix(stateMachine machine.FiniteStateMachine, character string
 		return 0, errors.New("character size not equals to 1")
 	}
 
-    var err error
+	var err error
 
-    stateMachine, err = tools.RemoveEmptySymbols(stateMachine)
-    if err != nil {
-        return 0, err
-    }
+	stateMachine, err = tools.RemoveEmptySymbols(stateMachine)
+	if err != nil {
+		return 0, err
+	}
 
 	stateMachine, err = tools.Determine(stateMachine)
 	if err != nil {
