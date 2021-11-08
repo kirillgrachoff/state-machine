@@ -10,14 +10,14 @@ type State interface {
 // Edge is for transfers representation
 type Edge struct {
 	From State
-	To State
+	To   State
 	With string
 }
 
 // FiniteStateMachine is a finite automaton
 type FiniteStateMachine interface {
 	GoBackwardBy(to []State, with string) []State
-    GoForwardBy(from []State, with string) []State
+	GoForwardBy(from []State, with string) []State
 	OutgoingEdges(from []State) []Edge
 	IngoingEdges(to []State) []Edge
 	States() []State

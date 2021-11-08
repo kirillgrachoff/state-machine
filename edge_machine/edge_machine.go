@@ -55,7 +55,7 @@ func BuildNewMachine(transfers []Edge, startVertices, terminateVertices []uint) 
 	for number, summary := range status {
 		machine.states[number] = State{
 			Index: number,
-			End: (summary & isTerminate) != 0,
+			End:   (summary & isTerminate) != 0,
 			Begin: (summary & isStart) != 0,
 		}
 	}
@@ -160,7 +160,7 @@ func (machine Machine) OutgoingEdges(from []m.State) []m.Edge {
 		if in[edge.From] {
 			ans = append(ans, m.Edge{
 				From: machine.states[edge.From],
-				To: machine.states[edge.To],
+				To:   machine.states[edge.To],
 				With: edge.With,
 			})
 		}
@@ -178,7 +178,7 @@ func (machine Machine) IngoingEdges(to []m.State) []m.Edge {
 		if in[edge.To] {
 			ans = append(ans, m.Edge{
 				From: machine.states[edge.From],
-				To: machine.states[edge.To],
+				To:   machine.states[edge.To],
 				With: edge.With,
 			})
 		}
