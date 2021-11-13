@@ -17,7 +17,7 @@ jobs:
       - name: gobench tools
         run: go test ./tools -test.bench -test.run
       - name: go coverage
-        run: go test state-machine/edge_machine state-machine/tools -coverprofile=out.cov
+        run: go test state-machine/edge_machine state-machine/tools state-machine/problems -coverprofile=out.cov
       - name: upload artifacts
         uses: actions/upload-artifact@v2
         with:

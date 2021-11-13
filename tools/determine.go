@@ -56,7 +56,7 @@ func dfsWithMasks(machine m.FiniteStateMachine, start []uint) []edge.Edge {
 			alphabet[e.With] = struct{}{}
 		}
 		for symbol := range alphabet {
-			to := machine.GoBy(vStates, symbol)
+			to := machine.GoForwardBy(vStates, symbol)
 			if len(to) == 0 {
 				continue
 			}
