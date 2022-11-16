@@ -55,7 +55,7 @@ func BuildNewMachine(transfers []Edge, startVertices, terminateVertices []uint) 
 	for number, summary := range status {
 		machine.states[number] = State{
 			Index: number,
-			End: (summary & isTerminate) != 0,
+			End:   (summary & isTerminate) != 0,
 			Begin: (summary & isStart) != 0,
 		}
 	}
@@ -79,15 +79,15 @@ func (machine Machine) Equals(other Machine) bool {
 	return true
 }
 
-// goByRune is a procedure which receives a key To make transfer With
+// goForwardByRune is a procedure which receives a key To make transfer With
 // it is guaranteed that its size not more than 1
-func (machine Machine) goByRune(from []m.State, with string) []m.State {
+func (machine Machine) goForwardByRune(from []m.State, with string) []m.State {
 	if len(with) > 1 {
-		panic("transfer size is > 1")
+		panic("too big string")
 	}
 	fromCnt := make(map[uint]bool)
-	for _, f := range from {
-		fromCnt[f.Number()] = true
+	for _, state := range from {
+		fromCnt[state.Number()] = true
 	}
 
 	ans := make([]m.State, 0)
@@ -99,15 +99,45 @@ func (machine Machine) goByRune(from []m.State, with string) []m.State {
 	return ans
 }
 
-// GoBy works incorrect if `with` == ""
+func (machine Machine) goBackwardByRune(to []m.State, with string) []m.State {
+	if len(with) > 1 {
+		panic("too big string")
+	}
+	toCnt := make(map[uint]bool)
+	for _, state := range to {
+		toCnt[state.Number()] = true
+	}
+
+	ans := make([]m.State, 0)
+	for _, edge := range machine.mapping {
+		if toCnt[edge.To] && edge.With == with {
+			ans = append(ans, machine.states[edge.From])
+		}
+	}
+	return ans
+}
+
+// GoForwardBy works incorrect if `with` == ""
 // it does only one step for every rune
-func (machine Machine) GoBy(from []m.State, with string) []m.State {
+func (machine Machine) GoForwardBy(from []m.State, with string) []m.State {
 	if with == "" {
-		return machine.goByRune(from, "")
+		return machine.goForwardByRune(from, "")
 	}
 	ans := from
 	for _, symbol := range with {
-		ans = machine.goByRune(ans, string(symbol))
+		ans = machine.goForwardByRune(ans, string(symbol))
+	}
+	return ans
+}
+
+// GoBackwardBy is similar to GoForwardBy, but it goes back
+func (machine Machine) GoBackwardBy(to []m.State, with string) []m.State {
+	if with == "" {
+		return machine.goBackwardByRune(to, "")
+	}
+	ans := to
+	for _, symbol := range with {
+		ans = machine.goBackwardByRune(to, string(symbol))
 	}
 	return ans
 }
@@ -130,7 +160,7 @@ func (machine Machine) OutgoingEdges(from []m.State) []m.Edge {
 		if in[edge.From] {
 			ans = append(ans, m.Edge{
 				From: machine.states[edge.From],
-				To: machine.states[edge.To],
+				To:   machine.states[edge.To],
 				With: edge.With,
 			})
 		}
@@ -148,7 +178,7 @@ func (machine Machine) IngoingEdges(to []m.State) []m.Edge {
 		if in[edge.To] {
 			ans = append(ans, m.Edge{
 				From: machine.states[edge.From],
-				To: machine.states[edge.To],
+				To:   machine.states[edge.To],
 				With: edge.With,
 			})
 		}
